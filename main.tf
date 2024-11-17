@@ -3,6 +3,7 @@ resource "aws_vpc" "vpc01_v1" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
+  security_groups = aws_security_groups.VPC_security_group.id
   tags = {
     Name = "vpc01_v1"
   }
@@ -83,6 +84,30 @@ resource "aws_security_group" "SMS_instance" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+# Security Group for the VPC
+resource "aws_security_group" "VPC_security_group" {
+  name        = "sg_VPC"
+  description = "Security group for SMS instance"
+  vpc_id      = aws_vpc.vpc01_v1.id
+
+  # Allow inbound HTTP traffic
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all outbound traffic
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 
 # IAM Role for Systems Manager (SSM)
 resource "aws_iam_role" "ssm_role" {
